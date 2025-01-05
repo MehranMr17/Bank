@@ -1,0 +1,7 @@
+id=1
+amount=500000
+type=Melak
+branchId=4
+,
+
+
