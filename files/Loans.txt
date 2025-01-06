@@ -1,7 +1,12 @@
-id=1
-amount=500000
-type=Melak
-branchId=4
+
+id=3
+amount=1
+type=1
+branchId=7
 ,
 
-
+id=4
+amount=1
+type=1
+branchId=5
+,

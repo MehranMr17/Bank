@@ -1,17 +1,6 @@
-id=1
-type=arzi
-balance=15000
-branchId=4
-,
 
 id=2
-type=arzi
-balance=1200
-branchId=5
-,
-
-id=3
 type=Arzi
-balance=15000
-branchId=5
+balance=35000
+branchId=4
 ,

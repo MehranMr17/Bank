@@ -18,7 +18,7 @@ string CurrentDate() {
 
 	struct tm localTime;
 
-	localtime_s(&localTime, &currentTime); 
+	localtime_s(&localTime, &currentTime);
 
 
 	std::ostringstream dateStream;
@@ -26,7 +26,8 @@ string CurrentDate() {
 	return dateStream.str();
 }
 
-void managerPanel(), login();
+void managerPanel(), login(), userPanel();
+class LoanClass;
 
 struct Bank
 {
@@ -341,16 +342,169 @@ public:
 
 };
 
-class BankBranchClass {
+class Cust_LoansClass {
 public:
 
 
-	void getAll() {
+	void add(string date, int cId, int lId) {
 
 
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
 
-		BankBranch branches[100], tempBranch;
+
+		string s;
+		string readedFile = "";
+
+		while (getline(ifile, s)) {
+			readedFile.append(s);
+			readedFile.append("\n");
+		}
+
+		ifile.close();
+		ofstream ofile;
+		ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
+
+
+		ofile << readedFile;
+
+		ofile << endl;
+		ofile << "cId=" << cId;
+		ofile << endl;
+		ofile << "lId=" << lId;
+		ofile << endl;
+		ofile << "date=" << date;
+		ofile << endl;
+		ofile << ",";
+		ofile << endl;
+
+		ofile.close();
+
+
+	}
+
+	Cust_Loan searchBycId(int searchedcId) {
+		Cust_Loan cust_loan;
+		cust_loan.CustId = -1;
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
+		string s;
+		int temp = -1;
+
+		while (getline(ifile, s)) {
+
+			if (cust_loan.CustId == -1 || temp == -1) {
+
+				if (s.find("cId=") != string::npos) {
+					int n = stoi(s.replace(0, 4, ""));
+					temp = 0;
+					if (n == searchedcId) {
+						cust_loan.CustId = n;
+						temp = -1;
+					}
+
+				}
+
+				if (s.find("lId=") != string::npos) {
+					cust_loan.LoanId = stoi(s.replace(0, 4, ""));
+				}
+				if (s.find("date=") != string::npos) {
+					cust_loan.date = s.replace(0, 5, "");
+				}
+			}
+		}
+
+		if (cust_loan.CustId == -1)
+		{
+			cust_loan.LoanId = -1;
+			cust_loan.date = "";
+		}
+		ifile.close();
+
+		return cust_loan;
+	}
+
+	Cust_Loan searchBylId(int searchedlId) {
+		Cust_Loan cust_loan;
+		cust_loan.LoanId = -1;
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
+		string s;
+		int temp = 0;
+
+
+		while (getline(ifile, s)) {
+
+			if (cust_loan.LoanId == -1) {
+				if (s.find("cId=") != string::npos) {
+					cust_loan.CustId = stoi(s.replace(0, 4, ""));
+				}
+				if (s.find("lId=") != string::npos) {
+					int n = stoi(s.replace(0, 4, ""));
+					if (n == searchedlId) {
+						cust_loan.LoanId = n;
+						temp = -1;
+					}
+				}
+			}
+
+			if (temp == -1) {
+				if (s.find("date=") != string::npos) {
+					cust_loan.date = s.replace(0, 5, "");
+					temp = 0;
+				}
+
+			}
+
+		}
+
+		if (cust_loan.LoanId == -1)
+		{
+			cust_loan.CustId = -1;
+			cust_loan.date = "";
+		}
+		ifile.close();
+
+		return cust_loan;
+	}
+
+	void deletef(Cust_Loan cust_loan) {
+		if (cust_loan.LoanId != -1) {
+
+			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
+
+			string s;
+			string readedFile = "";
+
+			while (getline(ifile, s)) {
+				readedFile.append(s);
+				readedFile.append("\n");
+			}
+			size_t indexa = 0;
+			string a = "cId=" + to_string(cust_loan.CustId) + "\n" "lId=" + to_string(cust_loan.LoanId) + "\n" + "date=" + cust_loan.date + "\n" + ",";
+
+			while ((indexa = readedFile.find(a, indexa)) != string::npos) {
+				readedFile.replace(indexa, a.length(), "");
+			}
+
+			ifile.close();
+			ofstream ofile;
+			ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
+
+
+			ofile << readedFile;
+			ofile.close();
+		}
+	}
+
+
+
+	void editlId(int cId, int lId) {
+
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
+
+		Cust_Loan cust_loans[100], tempCust_loan;
+
 
 		string s;
 		int t = 0;
@@ -361,245 +515,123 @@ public:
 
 			string char_arr_str = s;
 
-			if (s.find("id=") != string::npos) {
-				tempBranch.BranchId = stoi(s.replace(0, 3, ""));
+			if (s.find("cId=") != string::npos) {
+				tempCust_loan.CustId = stoi(s.replace(0, 4, ""));
 				t = 1;
 			}
-			if (s.find("BranchAddress=") != string::npos) {
-				tempBranch.BranchAddress = s.replace(0, 14, "");
+			if (s.find("lId=") != string::npos) {
+				tempCust_loan.LoanId = stoi(s.replace(0, 4, ""));
 				t = 2;
 			}
-			if (s.find("BankID=") != string::npos) {
-				tempBranch.BankId = stoi(s.replace(0, 7, ""));
+			if (s.find("date=") != string::npos) {
+				tempCust_loan.date = s.replace(0, 5, "");
 				t = 3;
 			}
 
 			if (t == 3) {
-				branches[i++] = tempBranch;
+				cust_loans[i] = tempCust_loan;
 				t = 0;
+				i++;
 			}
 
 		}
 
 		ifile.close();
-
-		cout << endl;
-		cout << "     Id     |     Address     |     BankId\n";
-		for (int j = 0; j < i; j++)
-		{
-			BankBranch b = branches[j];
-			cout << "------------------------------------------------------------------------------------------------------------------\n";
-			cout << "     " << b.BranchId << "     |     ";
-			cout << b.BranchAddress << "     |     ";
-			cout << b.BankId << endl;
-		}
-
-
-	}
-
-	void add(string BranchAddress, int BankID) {
-		int id = 1;
-
-
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
-
-
-		string s;
 		string readedFile = "";
 
-		while (getline(ifile, s)) {
-			readedFile.append(s);
-			readedFile.append("\n");
-			cout << s << endl;;
 
-			string char_arr_str = s;
-
-			if (s.find("id=") != string::npos) {
-				id = stoi(s.replace(0, 3, ""));
+		for (int j = 0; j < i; j++)
+		{
+			Cust_Loan c = cust_loans[j];
+			string b = "cId=" + to_string(c.CustId) + "\n" "lId=" + to_string(c.LoanId) + "\n" + "date=" + c.date + "\n" + ",\n";
+			if (c.CustId == cId)
+			{
+				b = "cId=" + to_string(c.CustId) + "\n" "lId=" + to_string(lId) + "\n" + "date=" + c.date + "\n" + ",\n";
 			}
+			readedFile.append(b);
 
 		}
-		id++;
 
-		ifile.close();
+
+
+
 		ofstream ofile;
-		ofile.open("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
+		ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
 
 
 		ofile << readedFile;
-
-		ofile << endl;
-		ofile << "id=" << id;
-		ofile << endl;
-		ofile << "BranchAddress=" << BranchAddress;
-		ofile << endl;
-		ofile << "BankID=" << BankID;
-		ofile << endl;
-		ofile << ",";
-		ofile << endl;
-
 		ofile.close();
 
-
 	}
 
-	BankBranch searchByAddress(string searchedAddress) {
-		BankBranch bankBranch;
-		bankBranch.BranchAddress = "";
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
+	void editcId(int lId, int cId) {
+
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
+
+		Cust_Loan cust_loans[100], tempCust_loan;
 
 
 		string s;
-		int temp = 0;
+		int t = 0;
+		int i = 0;
 
 
 		while (getline(ifile, s)) {
-			if (bankBranch.BranchAddress == "") {
-				if (s.find("id=") != string::npos) {
-					bankBranch.BranchId = stoi(s.replace(0, 3, ""));
-				}
-				if (s.find("BranchAddress=") != string::npos) {
-					string n = s.replace(0, 14, "");
-					if (n.find(searchedAddress) != string::npos) {
-						bankBranch.BranchAddress = n;
-						temp = -1;
-					}
-				}
+
+			string char_arr_str = s;
+
+			if (s.find("cId=") != string::npos) {
+				tempCust_loan.CustId = stoi(s.replace(0, 4, ""));
+				t = 1;
+			}
+			if (s.find("lId=") != string::npos) {
+				tempCust_loan.LoanId = stoi(s.replace(0, 4, ""));
+				t = 2;
+			}
+			if (s.find("date=") != string::npos) {
+				tempCust_loan.date = s.replace(0, 5, "");
+				t = 3;
 			}
 
-			if (temp == -1) {
-				if (s.find("BankID=") != string::npos) {
-					bankBranch.BankId = stoi(s.replace(0, 7, ""));
-					temp = 0;
-				}
-
+			if (t == 3) {
+				cust_loans[i] = tempCust_loan;
+				t = 0;
+				i++;
 			}
 
-		}
-
-		if (bankBranch.BranchAddress == "")
-		{
-			bankBranch.BranchId = -1;
-			bankBranch.BankId = -1;
 		}
 
 		ifile.close();
-		return bankBranch;
-	}
-
-	BankBranch searchById(int searchedId) {
-		BankBranch bankBranch;
-		bankBranch.BranchAddress = "";
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
+		string readedFile = "";
 
 
-		string s;
-		int temp = 0;
-
-
-		while (getline(ifile, s)) {
-			if (bankBranch.BranchAddress == "") {
-				if (s.find("id=") != string::npos) {
-					int n = stoi(s.replace(0, 3, ""));
-					if (n == searchedId) {
-						bankBranch.BranchId = n;
-						temp = -1;
-					}
-				}
-
-			}
-
-			if (temp == -1) {
-				if (s.find("BranchAddress=") != string::npos) {
-					bankBranch.BranchAddress = s.replace(0, 14, "");
-				}
-				if (s.find("BankID=") != string::npos) {
-					bankBranch.BankId = stoi(s.replace(0, 7, ""));
-					temp = 0;
-				}
-			}
-
-		}
-
-		if (bankBranch.BranchAddress == "")
+		for (int j = 0; j < i; j++)
 		{
-			bankBranch.BranchId = -1;
-			bankBranch.BankId = -1;
-		}
-
-		ifile.close();
-		return bankBranch;
-	}
-
-	string deletef(BankBranch bankBranch) {
-		if (bankBranch.BranchId != -1) {
-
-			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
-
-			string s;
-			string readedFile = "";
-
-			while (getline(ifile, s)) {
-				readedFile.append(s);
-				readedFile.append("\n");
+			Cust_Loan c = cust_loans[j];
+			string b = "cId=" + to_string(c.CustId) + "\n" "lId=" + to_string(c.LoanId) + "\n" + "date=" + c.date + "\n" + ",\n";
+			if (c.LoanId == lId)
+			{
+				b = "cId=" + to_string(cId) + "\n" "lId=" + to_string(c.LoanId) + "\n" + "date=" + c.date + "\n" + ",\n";
 			}
-			size_t indexa = 0;
-			string a = "id=" + to_string(bankBranch.BranchId) + "\n" + "BranchAddress=" + bankBranch.BranchAddress + "\n" + "BankID=" + to_string(bankBranch.BankId) + "\n" + ",";
+			readedFile.append(b);
 
-			while ((indexa = readedFile.find(a, indexa)) != string::npos) {
-				readedFile.replace(indexa, a.length(), "");
-			}
-
-			ifile.close();
-			ofstream ofile;
-			ofile.open("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
-
-
-			ofile << readedFile;
-			ofile.close();
-			return "Branch deleted";
 		}
-		else {
-			return "Branch not found";
-		}
-	}
-
-	string edit(int id, string BranchAddress, int BankID) {
-		BankBranch bankBranch = searchById(id);
-		if (bankBranch.BranchId != -1) {
-
-			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
-
-			string s;
-			string readedFile = "";
-
-			while (getline(ifile, s)) {
-				readedFile.append(s);
-				readedFile.append("\n");
-			}
-			size_t indexa = 0;
-			string a = "id=" + to_string(bankBranch.BranchId) + "\n" + "BranchAddress=" + bankBranch.BranchAddress + "\n" + "BankID=" + to_string(bankBranch.BankId) + "\n" + ",";
-			string b = "id=" + to_string(id) + "\n" + "BranchAddress=" + BranchAddress + "\n" + "BankID=" + to_string(BankID) + "\n" + ",";
-
-			while ((indexa = readedFile.find(a, indexa)) != string::npos) {
-				readedFile.replace(indexa, a.length(), b);
-			}
-
-			ifile.close();
-			ofstream ofile;
-			ofile.open("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
 
 
-			ofile << readedFile;
-			ofile.close();
-			return  "branch edited";
-		}
-		else {
-			return "branch not found";
-		}
+
+
+		ofstream ofile;
+		ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
+
+
+		ofile << readedFile;
+		ofile.close();
+
 	}
 
 };
+
 
 class CustomerClass {
 public:
@@ -659,6 +691,81 @@ public:
 			cout << c.Phone << "     |     ";
 			cout << c.Address << endl;
 		}
+
+
+	}
+
+	void getAllWithNoLoan() {
+
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Customers.txt");
+
+		Customer customers[100], tempCustomer;
+
+
+		string s;
+		int t = 0;
+		int i = 0;
+
+
+		while (getline(ifile, s)) {
+
+			string char_arr_str = s;
+
+			if (s.find("id=") != string::npos) {
+				tempCustomer.CustId = stoi(s.replace(0, 3, ""));
+				t = 1;
+			}
+			if (s.find("name=") != string::npos) {
+				tempCustomer.Name = s.replace(0, 5, "");
+				t = 2;
+			}
+			if (s.find("phone=") != string::npos) {
+				tempCustomer.Phone = s.replace(0, 6, "");
+				t = 3;
+			}
+			if (s.find("address=") != string::npos) {
+				tempCustomer.Address = s.replace(0, 8, "");
+				t = 4;
+			}
+
+			if (t == 4) {
+				customers[i] = tempCustomer;
+				t = 0;
+				i++;
+			}
+
+		}
+
+		ifile.close();
+		int isEnyCusFound = 0;
+
+		Cust_LoansClass cust_loanClass;
+
+		cout << endl;
+
+		for (int j = 0; j < i; j++)
+		{
+			Customer c = customers[j];
+			if (cust_loanClass.searchBycId(c.CustId).CustId == -1)
+			{
+				if (isEnyCusFound == 0)
+				{
+					cout << "     Id     |     Name     |     Phone     |     Address\n";
+					isEnyCusFound = 1;
+				}
+				cout << "------------------------------------------------------------------------------------------------------------------\n";
+				cout << "     " << c.CustId << "     |     ";
+				cout << c.Name << "     |     ";
+				cout << c.Phone << "     |     ";
+				cout << c.Address << endl;
+			}
+		}
+		if (isEnyCusFound == 0)
+		{
+			cout << "No Customer Found \n";
+		}
+		cout << endl;
 
 
 	}
@@ -872,6 +979,297 @@ public:
 
 };
 
+class Cust_AccClass {
+public:
+
+
+
+	void add(string date, int cId, int aId) {
+
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+
+
+		string s;
+		string readedFile = "";
+
+		while (getline(ifile, s)) {
+			readedFile.append(s);
+			readedFile.append("\n");
+		}
+
+		ifile.close();
+		ofstream ofile;
+		ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+
+
+		ofile << readedFile;
+
+		ofile << endl;
+		ofile << "cId=" << cId;
+		ofile << endl;
+		ofile << "aId=" << aId;
+		ofile << endl;
+		ofile << "date=" << date;
+		ofile << endl;
+		ofile << ",";
+		ofile << endl;
+
+		ofile.close();
+
+
+	}
+
+	Cust_ACC searchBycId(int searchedcId) {
+		Cust_ACC cust_acc;
+		cust_acc.CustId = -1;
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+		string s;
+		int temp = -1;
+
+		while (getline(ifile, s)) {
+
+			if (cust_acc.CustId == -1 || temp == -1) {
+
+				if (s.find("cId=") != string::npos) {
+					int n = stoi(s.replace(0, 4, ""));
+					temp = 0;
+					if (n == searchedcId) {
+						cust_acc.CustId = n;
+						temp = -1;
+					}
+
+				}
+
+				if (s.find("aId=") != string::npos) {
+					cust_acc.AccId = stoi(s.replace(0, 4, ""));
+				}
+				if (s.find("date=") != string::npos) {
+					cust_acc.date = s.replace(0, 5, "");
+				}
+			}
+		}
+
+		if (cust_acc.CustId == -1)
+		{
+			cust_acc.AccId = -1;
+			cust_acc.date = "";
+		}
+		ifile.close();
+
+		return cust_acc;
+	}
+
+	Cust_ACC searchByaId(int searchedaId) {
+		Cust_ACC cust_acc;
+		cust_acc.AccId = -1;
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+		string s;
+		int temp = 0;
+
+
+		while (getline(ifile, s)) {
+
+			if (cust_acc.AccId == -1) {
+				if (s.find("cId=") != string::npos) {
+					cust_acc.CustId = stoi(s.replace(0, 4, ""));
+				}
+				if (s.find("aId=") != string::npos) {
+					int n = stoi(s.replace(0, 4, ""));
+					if (n == searchedaId) {
+						cust_acc.AccId = n;
+						temp = -1;
+					}
+				}
+			}
+
+			if (temp == -1) {
+				if (s.find("date=") != string::npos) {
+					cust_acc.date = s.replace(0, 5, "");
+					temp = 0;
+				}
+
+			}
+
+		}
+
+
+		if (cust_acc.AccId == -1)
+		{
+			cust_acc.CustId = -1;
+			cust_acc.date = "";
+		}
+		ifile.close();
+
+		return cust_acc;
+	}
+
+	void deletef(Cust_ACC cust_acc) {
+		if (cust_acc.AccId != -1) {
+
+			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+
+			string s;
+			string readedFile = "";
+
+			while (getline(ifile, s)) {
+				readedFile.append(s);
+				readedFile.append("\n");
+			}
+			size_t indexa = 0;
+			string a = "cId=" + to_string(cust_acc.CustId) + "\n" "aId=" + to_string(cust_acc.AccId) + "\n" + "date=" + cust_acc.date + "\n" + ",";
+
+			while ((indexa = readedFile.find(a, indexa)) != string::npos) {
+				readedFile.replace(indexa, a.length(), "");
+			}
+
+			ifile.close();
+			ofstream ofile;
+			ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+
+
+			ofile << readedFile;
+			ofile.close();
+		}
+	}
+
+	void editaId(int cId, int aId) {
+
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+
+		Cust_ACC cust_accs[100], tempCust_acc;
+
+
+		string s;
+		int t = 0;
+		int i = 0;
+
+
+		while (getline(ifile, s)) {
+
+			string char_arr_str = s;
+
+			if (s.find("cId=") != string::npos) {
+				tempCust_acc.CustId = stoi(s.replace(0, 4, ""));
+				t = 1;
+			}
+			if (s.find("aId=") != string::npos) {
+				tempCust_acc.AccId = stoi(s.replace(0, 4, ""));
+				t = 2;
+			}
+			if (s.find("date=") != string::npos) {
+				tempCust_acc.date = s.replace(0, 5, "");
+				t = 3;
+			}
+
+			if (t == 3) {
+				cust_accs[i] = tempCust_acc;
+				t = 0;
+				i++;
+			}
+
+		}
+
+		ifile.close();
+		string readedFile = "";
+
+
+		for (int j = 0; j < i; j++)
+		{
+			Cust_ACC c = cust_accs[j];
+			string b = "cId=" + to_string(c.CustId) + "\n" "aId=" + to_string(c.AccId) + "\n" + "date=" + c.date + "\n" + ",\n";
+			if (c.CustId == cId)
+			{
+				b = "cId=" + to_string(c.CustId) + "\n" "aId=" + to_string(aId) + "\n" + "date=" + c.date + "\n" + ",\n";
+			}
+			readedFile.append(b);
+
+		}
+
+
+
+
+		ofstream ofile;
+		ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+
+
+		ofile << readedFile;
+		ofile.close();
+
+	}
+
+	void editcId(int aId, int cId) {
+
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+
+		Cust_ACC cust_accs[100], tempCust_acc;
+
+
+		string s;
+		int t = 0;
+		int i = 0;
+
+
+		while (getline(ifile, s)) {
+
+			string char_arr_str = s;
+
+			if (s.find("cId=") != string::npos) {
+				tempCust_acc.CustId = stoi(s.replace(0, 4, ""));
+				t = 1;
+			}
+			if (s.find("aId=") != string::npos) {
+				tempCust_acc.AccId = stoi(s.replace(0, 4, ""));
+				t = 2;
+			}
+			if (s.find("date=") != string::npos) {
+				tempCust_acc.date = s.replace(0, 5, "");
+				t = 3;
+			}
+
+			if (t == 3) {
+				cust_accs[i] = tempCust_acc;
+				t = 0;
+				i++;
+			}
+
+		}
+
+		ifile.close();
+		string readedFile = "";
+
+
+		for (int j = 0; j < i; j++)
+		{
+			Cust_ACC c = cust_accs[j];
+			string b = "cId=" + to_string(c.CustId) + "\n" "aId=" + to_string(c.AccId) + "\n" + "date=" + c.date + "\n" + ",\n";
+			if (c.AccId == aId)
+			{
+				b = "cId=" + to_string(cId) + "\n" "aId=" + to_string(c.AccId) + "\n" + "date=" + c.date + "\n" + ",\n";
+			}
+			readedFile.append(b);
+
+		}
+
+
+
+
+		ofstream ofile;
+		ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+
+
+		ofile << readedFile;
+		ofile.close();
+
+	}
+
+
+};
+
 class AccountClass {
 public:
 
@@ -930,6 +1328,84 @@ public:
 			cout << c.Balance << "     |     ";
 			cout << c.BranchId << endl;
 		}
+
+
+	}
+
+	void getAllwithBalanceCheck() {
+
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Accounts.txt");
+
+		Account accounts[100], tempAccount;
+
+
+		string s;
+		int t = 0;
+		int i = 0;
+
+
+		while (getline(ifile, s)) {
+
+			string char_arr_str = s;
+
+			if (s.find("id=") != string::npos) {
+				tempAccount.AccId = stoi(s.replace(0, 3, ""));
+				t = 1;
+			}
+			if (s.find("type=") != string::npos) {
+				tempAccount.AccType = s.replace(0, 5, "");
+				t = 2;
+			}
+			if (s.find("balance=") != string::npos) {
+				tempAccount.Balance = stoi(s.replace(0, 8, ""));
+				t = 3;
+			}
+			if (s.find("branchId=") != string::npos) {
+				tempAccount.BranchId = stoi(s.replace(0, 9, ""));
+				t = 4;
+			}
+
+			if (t == 4) {
+				accounts[i] = tempAccount;
+				t = 0;
+				i++;
+			}
+
+		}
+
+		ifile.close();
+		CustomerClass customerClass;
+		Cust_AccClass cust_accClass;
+		int isEnyCusFound = 0;
+
+		cout << endl;
+		for (int j = 0; j < i; j++)
+		{
+			Account a = accounts[j];
+			if (a.Balance > 25000)
+			{
+				if (isEnyCusFound == 0)
+				{
+					cout << "     Id     |     Name     |     Phone     |     Address\n";
+					isEnyCusFound = 1;
+				}
+				Cust_ACC ca = cust_accClass.searchByaId(a.AccId);
+				Customer c = customerClass.searchById(ca.CustId);
+				cout << "------------------------------------------------------------------------------------------------------------------\n";
+				cout << "     " << c.CustId << "     |     ";
+				cout << c.Name << "     |     ";
+				cout << c.Phone << "     |     ";
+				cout << c.Address << endl;
+
+			}
+		}
+		if (isEnyCusFound == 0)
+		{
+			cout << "No Customer Found \n";
+		}
+
+		cout << endl;
 
 
 	}
@@ -1159,6 +1635,91 @@ public:
 
 	}
 
+	void getCustomersLoans(int cId) {
+
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Loans.txt");
+
+		Loan loans[100], tempLoan;
+
+
+		string s;
+		int t = 0;
+		int i = 0;
+
+
+		while (getline(ifile, s)) {
+
+			string char_arr_str = s;
+
+			if (s.find("id=") != string::npos) {
+				tempLoan.LoanId = stoi(s.replace(0, 3, ""));
+				t = 1;
+			}
+			if (s.find("amount=") != string::npos) {
+				tempLoan.Amount = stoi(s.replace(0, 7, ""));
+				t = 2;
+			}
+			if (s.find("type=") != string::npos) {
+				tempLoan.LoanType = s.replace(0, 5, "");
+				t = 3;
+			}
+			if (s.find("branchId=") != string::npos) {
+				tempLoan.BranchID = stoi(s.replace(0, 9, ""));
+				t = 4;
+			}
+
+			if (t == 4) {
+				loans[i] = tempLoan;
+				t = 0;
+				i++;
+			}
+
+		}
+
+		ifile.close();
+		int isEnyCusFound = 0;
+
+		Cust_LoansClass cust_loanClass;
+		CustomerClass customerClass;
+
+
+		cout << endl;
+		for (int j = 0; j < i; j++)
+		{
+			Loan l = loans[j];
+
+			Cust_Loan cl = cust_loanClass.searchBylId(l.LoanId);
+
+			Customer c = customerClass.searchById(cl.CustId);
+
+			if (c.CustId == cId)
+			{
+				if (isEnyCusFound == 0)
+				{
+					cout << "     Id     |     amount     |     type     |     branchId\n";
+					isEnyCusFound = 1;
+				}
+
+				cout << "------------------------------------------------------------------------------------------------------------------\n";
+				cout << "     " << l.LoanId << "     |     ";
+				cout << l.Amount << "     |     ";
+				cout << l.LoanType << "     |     ";
+				cout << l.BranchID << endl;
+			}
+
+
+		}
+
+
+		if (isEnyCusFound == 0)
+		{
+			cout << "No Loan Found For this cutomer \n";
+		}
+		cout << endl;
+
+	}
+
 	int add(string type, int amount, int branchId) {
 		int id = 1;
 
@@ -1254,7 +1815,7 @@ public:
 	Loan searchByBranchId(int searchedBranchId) {
 		Loan loan;
 		loan.BranchID = -1;
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Customers.txt");
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Loans.txt");
 
 
 		string s;
@@ -1369,14 +1930,143 @@ public:
 
 };
 
-class Cust_AccClass {
+
+
+
+
+class BankBranchClass {
 public:
 
 
-	void add(string date, int cId, int aId) {
+	void getAll() {
 
 
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
+
+		BankBranch branches[100], tempBranch;
+
+		string s;
+		int t = 0;
+		int i = 0;
+
+
+		while (getline(ifile, s)) {
+
+			string char_arr_str = s;
+
+			if (s.find("id=") != string::npos) {
+				tempBranch.BranchId = stoi(s.replace(0, 3, ""));
+				t = 1;
+			}
+			if (s.find("BranchAddress=") != string::npos) {
+				tempBranch.BranchAddress = s.replace(0, 14, "");
+				t = 2;
+			}
+			if (s.find("BankID=") != string::npos) {
+				tempBranch.BankId = stoi(s.replace(0, 7, ""));
+				t = 3;
+			}
+
+			if (t == 3) {
+				branches[i++] = tempBranch;
+				t = 0;
+			}
+
+		}
+
+		ifile.close();
+
+		cout << endl;
+		cout << "     Id     |     Address     |     BankId\n";
+		for (int j = 0; j < i; j++)
+		{
+			BankBranch b = branches[j];
+			cout << "------------------------------------------------------------------------------------------------------------------\n";
+			cout << "     " << b.BranchId << "     |     ";
+			cout << b.BranchAddress << "     |     ";
+			cout << b.BankId << endl;
+		}
+
+
+	}
+
+	void getBranchesWhomPaidLoan() {
+
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
+
+		BankBranch branches[100], tempBranch;
+
+		string s;
+		int t = 0;
+		int i = 0;
+
+
+		while (getline(ifile, s)) {
+
+			string char_arr_str = s;
+
+			if (s.find("id=") != string::npos) {
+				tempBranch.BranchId = stoi(s.replace(0, 3, ""));
+				t = 1;
+			}
+			if (s.find("BranchAddress=") != string::npos) {
+				tempBranch.BranchAddress = s.replace(0, 14, "");
+				t = 2;
+			}
+			if (s.find("BankID=") != string::npos) {
+				tempBranch.BankId = stoi(s.replace(0, 7, ""));
+				t = 3;
+			}
+
+			if (t == 3) {
+				branches[i++] = tempBranch;
+				t = 0;
+			}
+
+		}
+
+		ifile.close();
+
+		int isEnyCusFound = 0;
+
+
+
+		LoanClass loanClass;
+
+		cout << endl;
+
+		for (int j = 0; j < i; j++)
+		{
+			BankBranch b = branches[j];
+			if (loanClass.searchByBranchId(b.BranchId).BranchID != -1)
+			{
+				if (isEnyCusFound == 0)
+				{
+					cout << "     Id     |     Address     |     BankId\n";
+					isEnyCusFound = 1;
+				}
+
+				cout << "------------------------------------------------------------------------------------------------------------------\n";
+				cout << "     " << b.BranchId << "     |     ";
+				cout << b.BranchAddress << "     |     ";
+				cout << b.BankId << endl;
+			}
+		}
+		if (isEnyCusFound == 0)
+		{
+			cout << "No Branch Found \n";
+		}
+		cout << endl;
+
+
+	}
+
+	void add(string BranchAddress, int BankID) {
+		int id = 1;
+
+
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
 
 
 		string s;
@@ -1385,21 +2075,30 @@ public:
 		while (getline(ifile, s)) {
 			readedFile.append(s);
 			readedFile.append("\n");
+			cout << s << endl;;
+
+			string char_arr_str = s;
+
+			if (s.find("id=") != string::npos) {
+				id = stoi(s.replace(0, 3, ""));
+			}
+
 		}
+		id++;
 
 		ifile.close();
 		ofstream ofile;
-		ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+		ofile.open("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
 
 
 		ofile << readedFile;
 
 		ofile << endl;
-		ofile << "cId=" << cId;
+		ofile << "id=" << id;
 		ofile << endl;
-		ofile << "aId=" << aId;
+		ofile << "BranchAddress=" << BranchAddress;
 		ofile << endl;
-		ofile << "date=" << date;
+		ofile << "BankID=" << BankID;
 		ofile << endl;
 		ofile << ",";
 		ofile << endl;
@@ -1409,92 +2108,98 @@ public:
 
 	}
 
-	Cust_ACC searchBycId(int searchedcId) {
-		Cust_ACC cust_acc;
-		cust_acc.CustId = -1;
+	BankBranch searchByAddress(string searchedAddress) {
+		BankBranch bankBranch;
+		bankBranch.BranchAddress = "";
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
 
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+
 		string s;
-		int temp = -1;
+		int temp = 0;
+
 
 		while (getline(ifile, s)) {
-
-			if (cust_acc.CustId == -1 || temp == -1) {
-
-				if (s.find("cId=") != string::npos) {
-					int n = stoi(s.replace(0, 4, ""));
-					temp = 0;
-					if (n == searchedcId) {
-						cust_acc.CustId = n;
+			if (bankBranch.BranchAddress == "") {
+				if (s.find("id=") != string::npos) {
+					bankBranch.BranchId = stoi(s.replace(0, 3, ""));
+				}
+				if (s.find("BranchAddress=") != string::npos) {
+					string n = s.replace(0, 14, "");
+					if (n.find(searchedAddress) != string::npos) {
+						bankBranch.BranchAddress = n;
 						temp = -1;
 					}
-
-				}
-
-				if (s.find("aId=") != string::npos) {
-					cust_acc.AccId = stoi(s.replace(0, 4, ""));
-				}
-				if (s.find("date=") != string::npos) {
-					cust_acc.date = s.replace(0, 5, "");
 				}
 			}
+
+			if (temp == -1) {
+				if (s.find("BankID=") != string::npos) {
+					bankBranch.BankId = stoi(s.replace(0, 7, ""));
+					temp = 0;
+				}
+
+			}
+
 		}
 
-		if (cust_acc.CustId == -1)
+		if (bankBranch.BranchAddress == "")
 		{
-			cust_acc.AccId = -1;
-			cust_acc.date = "";
+			bankBranch.BranchId = -1;
+			bankBranch.BankId = -1;
 		}
-		ifile.close();
 
-		return cust_acc;
+		ifile.close();
+		return bankBranch;
 	}
 
-	Cust_ACC searchByaId(int searchedaId) {
-		Cust_ACC cust_acc;
-		cust_acc.AccId = -1;
+	BankBranch searchById(int searchedId) {
+		BankBranch bankBranch;
+		bankBranch.BranchAddress = "";
+		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
 
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+
 		string s;
-		int temp = -1;
+		int temp = 0;
+
 
 		while (getline(ifile, s)) {
-
-			if (cust_acc.AccId == -1 || temp == -1) {
-
-				if (s.find("aId=") != string::npos) {
-					int n = stoi(s.replace(0, 4, ""));
-					temp = 0;
-					if (n == searchedaId) {
-						cust_acc.AccId = n;
+			if (bankBranch.BranchAddress == "") {
+				if (s.find("id=") != string::npos) {
+					int n = stoi(s.replace(0, 3, ""));
+					if (n == searchedId) {
+						bankBranch.BranchId = n;
 						temp = -1;
 					}
-
 				}
 
-				if (s.find("cId=") != string::npos) {
-					cust_acc.CustId = stoi(s.replace(0, 4, ""));
+			}
+
+			if (temp == -1) {
+				if (s.find("BranchAddress=") != string::npos) {
+					bankBranch.BranchAddress = s.replace(0, 14, "");
 				}
-				if (s.find("date=") != string::npos) {
-					cust_acc.date = s.replace(0, 5, "");
+				if (s.find("BankID=") != string::npos) {
+					bankBranch.BankId = stoi(s.replace(0, 7, ""));
+					temp = 0;
 				}
 			}
+
 		}
 
-		if (cust_acc.AccId == -1)
+		if (bankBranch.BranchAddress == "")
 		{
-			cust_acc.CustId = -1;
-			cust_acc.date = "";
+			bankBranch.BranchId = -1;
+			bankBranch.BankId = -1;
 		}
-		ifile.close();
 
-		return cust_acc;
+		ifile.close();
+		return bankBranch;
 	}
 
-	void deletef(Cust_ACC cust_acc) {
-		if (cust_acc.AccId != -1) {
+	string deletef(BankBranch bankBranch) {
+		if (bankBranch.BranchId != -1) {
 
-			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
 
 			string s;
 			string readedFile = "";
@@ -1504,7 +2209,7 @@ public:
 				readedFile.append("\n");
 			}
 			size_t indexa = 0;
-			string a = "cId=" + to_string(cust_acc.CustId) + "\n" "aId=" + to_string(cust_acc.AccId) + "\n" + "date=" + cust_acc.date + "\n" + ",";
+			string a = "id=" + to_string(bankBranch.BranchId) + "\n" + "BranchAddress=" + bankBranch.BranchAddress + "\n" + "BankID=" + to_string(bankBranch.BankId) + "\n" + ",";
 
 			while ((indexa = readedFile.find(a, indexa)) != string::npos) {
 				readedFile.replace(indexa, a.length(), "");
@@ -1512,18 +2217,23 @@ public:
 
 			ifile.close();
 			ofstream ofile;
-			ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+			ofile.open("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
 
 
 			ofile << readedFile;
 			ofile.close();
+			return "Branch deleted";
+		}
+		else {
+			return "Branch not found";
 		}
 	}
 
-	void editaId(Cust_ACC cust_acc, int aId) {
-		if (cust_acc.AccId != -1) {
+	string edit(int id, string BranchAddress, int BankID) {
+		BankBranch bankBranch = searchById(id);
+		if (bankBranch.BranchId != -1) {
 
-			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
 
 			string s;
 			string readedFile = "";
@@ -1533,8 +2243,8 @@ public:
 				readedFile.append("\n");
 			}
 			size_t indexa = 0;
-			string a = "cId=" + to_string(cust_acc.CustId) + "\n" "aId=" + to_string(cust_acc.AccId) + "\n" + "date=" + cust_acc.date + "\n" + ",";
-			string b = "cId=" + to_string(cust_acc.CustId) + "\n" "aId=" + to_string(aId) + "\n" + "date=" + cust_acc.date + "\n" + ",";
+			string a = "id=" + to_string(bankBranch.BranchId) + "\n" + "BranchAddress=" + bankBranch.BranchAddress + "\n" + "BankID=" + to_string(bankBranch.BankId) + "\n" + ",";
+			string b = "id=" + to_string(id) + "\n" + "BranchAddress=" + BranchAddress + "\n" + "BankID=" + to_string(BankID) + "\n" + ",";
 
 			while ((indexa = readedFile.find(a, indexa)) != string::npos) {
 				readedFile.replace(indexa, a.length(), b);
@@ -1542,258 +2252,22 @@ public:
 
 			ifile.close();
 			ofstream ofile;
-			ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
+			ofile.open("E:\\c++\\Projects\\Bank\\files\\BankBranchs.txt");
 
 
 			ofile << readedFile;
 			ofile.close();
+			return  "branch edited";
 		}
-	}
-
-	void editcId(Cust_ACC cust_acc, int cId) {
-		if (cust_acc.CustId != -1) {
-
-			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
-
-			string s;
-			string readedFile = "";
-
-			while (getline(ifile, s)) {
-				readedFile.append(s);
-				readedFile.append("\n");
-			}
-			size_t indexa = 0;
-			string a = "cId=" + to_string(cust_acc.CustId) + "\n" "aId=" + to_string(cust_acc.AccId) + "\n" + "date=" + cust_acc.date + "\n" + ",";
-			string b = "cId=" + to_string(cId) + "\n" "aId=" + to_string(cust_acc.AccId) + "\n" + "date=" + cust_acc.date + "\n" + ",";
-
-			while ((indexa = readedFile.find(a, indexa)) != string::npos) {
-				readedFile.replace(indexa, a.length(), b);
-			}
-
-			ifile.close();
-			ofstream ofile;
-			ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_ACCs.txt");
-
-
-			ofile << readedFile;
-			ofile.close();
+		else {
+			return "branch not found";
 		}
 	}
 
 };
 
-class Cust_LoansClass {
-public:
 
 
-	void add(string date, int cId, int lId) {
-
-
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
-
-
-		string s;
-		string readedFile = "";
-
-		while (getline(ifile, s)) {
-			readedFile.append(s);
-			readedFile.append("\n");
-		}
-
-		ifile.close();
-		ofstream ofile;
-		ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
-
-
-		ofile << readedFile;
-
-		ofile << endl;
-		ofile << "cId=" << cId;
-		ofile << endl;
-		ofile << "lId=" << lId;
-		ofile << endl;
-		ofile << "date=" << date;
-		ofile << endl;
-		ofile << ",";
-		ofile << endl;
-
-		ofile.close();
-
-
-	}
-
-	Cust_Loan searchBycId(int searchedcId) {
-		Cust_Loan cust_loan;
-		cust_loan.CustId = -1;
-
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
-		string s;
-		int temp = -1;
-
-		while (getline(ifile, s)) {
-
-			if (cust_loan.CustId == -1 || temp == -1) {
-
-				if (s.find("cId=") != string::npos) {
-					int n = stoi(s.replace(0, 4, ""));
-					temp = 0;
-					if (n == searchedcId) {
-						cust_loan.CustId = n;
-						temp = -1;
-					}
-
-				}
-
-				if (s.find("lId=") != string::npos) {
-					cust_loan.LoanId = stoi(s.replace(0, 4, ""));
-				}
-				if (s.find("date=") != string::npos) {
-					cust_loan.date = s.replace(0, 5, "");
-				}
-			}
-		}
-
-		if (cust_loan.CustId == -1)
-		{
-			cust_loan.LoanId = -1;
-			cust_loan.date = "";
-		}
-		ifile.close();
-
-		return cust_loan;
-	}
-
-	Cust_Loan searchBylId(int searchedlId) {
-		Cust_Loan cust_loan;
-		cust_loan.LoanId = -1;
-
-		ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
-		string s;
-		int temp = -1;
-
-		while (getline(ifile, s)) {
-
-			if (cust_loan.LoanId == -1 || temp == -1) {
-
-				if (s.find("lId=") != string::npos) {
-					int n = stoi(s.replace(0, 4, ""));
-					temp = 0;
-					if (n == searchedlId) {
-						cust_loan.LoanId = n;
-						temp = -1;
-					}
-
-				}
-
-				if (s.find("cId=") != string::npos) {
-					cust_loan.CustId = stoi(s.replace(0, 4, ""));
-				}
-				if (s.find("date=") != string::npos) {
-					cust_loan.date = s.replace(0, 5, "");
-				}
-			}
-		}
-
-		if (cust_loan.LoanId == -1)
-		{
-			cust_loan.CustId = -1;
-			cust_loan.date = "";
-		}
-		ifile.close();
-
-		return cust_loan;
-	}
-
-	void deletef(Cust_Loan cust_loan) {
-		if (cust_loan.LoanId != -1) {
-
-			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
-
-			string s;
-			string readedFile = "";
-
-			while (getline(ifile, s)) {
-				readedFile.append(s);
-				readedFile.append("\n");
-			}
-			size_t indexa = 0;
-			string a = "cId=" + to_string(cust_loan.CustId) + "\n" "lId=" + to_string(cust_loan.LoanId) + "\n" + "date=" + cust_loan.date + "\n" + ",";
-
-			while ((indexa = readedFile.find(a, indexa)) != string::npos) {
-				readedFile.replace(indexa, a.length(), "");
-			}
-
-			ifile.close();
-			ofstream ofile;
-			ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
-
-
-			ofile << readedFile;
-			ofile.close();
-		}
-	}
-
-	void editlId(Cust_Loan cust_loan, int lId) {
-		if (cust_loan.LoanId != -1) {
-
-			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
-
-			string s;
-			string readedFile = "";
-
-			while (getline(ifile, s)) {
-				readedFile.append(s);
-				readedFile.append("\n");
-			}
-			size_t indexa = 0;
-			string a = "cId=" + to_string(cust_loan.CustId) + "\n" "lId=" + to_string(cust_loan.LoanId) + "\n" + "date=" + cust_loan.date + "\n" + ",";
-			string b = "cId=" + to_string(cust_loan.CustId) + "\n" "lId=" + to_string(lId) + "\n" + "date=" + cust_loan.date + "\n" + ",";
-
-			while ((indexa = readedFile.find(a, indexa)) != string::npos) {
-				readedFile.replace(indexa, a.length(), b);
-			}
-
-			ifile.close();
-			ofstream ofile;
-			ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
-
-
-			ofile << readedFile;
-			ofile.close();
-		}
-	}
-
-	void editcId(Cust_Loan cust_loan, int cId) {
-		if (cust_loan.CustId != -1) {
-
-			ifstream ifile("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
-
-			string s;
-			string readedFile = "";
-
-			while (getline(ifile, s)) {
-				readedFile.append(s);
-				readedFile.append("\n");
-			}
-			size_t indexa = 0;
-			string a = "cId=" + to_string(cust_loan.CustId) + "\n" "lId=" + to_string(cust_loan.LoanId) + "\n" + "date=" + cust_loan.date + "\n" + ",";
-			string b = "cId=" + to_string(cId) + "\n" "lId=" + to_string(cust_loan.LoanId) + "\n" + "date=" + cust_loan.date + "\n" + ",";
-
-			while ((indexa = readedFile.find(a, indexa)) != string::npos) {
-				readedFile.replace(indexa, a.length(), b);
-			}
-
-			ifile.close();
-			ofstream ofile;
-			ofile.open("E:\\c++\\Projects\\Bank\\files\\Cust_Loans.txt");
-
-
-			ofile << readedFile;
-			ofile.close();
-		}
-	}
-
-};
 
 void bankPanel() {
 	BankClass bankClass;
@@ -2074,7 +2548,7 @@ void bankBranchPanel() {
 	}
 }
 
-void CustomerPanel() {
+void CustomerPanelForAdmin() {
 
 	CustomerClass customerClass;
 	int selectedPos = 0;
@@ -2107,7 +2581,7 @@ void CustomerPanel() {
 		customerClass.add(tempName, tempPhone, tempAddress);
 		system("cls");
 		cout << "\nCustomer added. \n";
-		CustomerPanel();
+		CustomerPanelForAdmin();
 		break;
 
 	case 2:
@@ -2117,7 +2591,7 @@ void CustomerPanel() {
 		tempRes = customerClass.deletef(tempCustomer);
 		system("cls");
 		cout << tempRes + " \n";
-		CustomerPanel();
+		CustomerPanelForAdmin();
 		break;
 
 	case 3:
@@ -2135,7 +2609,7 @@ void CustomerPanel() {
 		tempRes = customerClass.edit(tempId, tempName, tempPhone, tempAddress);
 		system("cls");
 		cout << tempRes + " \n";
-		CustomerPanel();
+		CustomerPanelForAdmin();
 		break;
 
 	case 4:
@@ -2147,7 +2621,7 @@ void CustomerPanel() {
 
 		if (tempPos == 1) {
 			system("cls");
-			CustomerPanel();
+			CustomerPanelForAdmin();
 		}
 		break;
 
@@ -2175,7 +2649,7 @@ void CustomerPanel() {
 
 		if (tempPos == 1) {
 			system("cls");
-			CustomerPanel();
+			CustomerPanelForAdmin();
 		}
 		break;
 	case 6:
@@ -2202,7 +2676,7 @@ void CustomerPanel() {
 
 		if (tempPos == 1) {
 			system("cls");
-			CustomerPanel();
+			CustomerPanelForAdmin();
 		}
 		break;
 
@@ -2217,7 +2691,7 @@ void CustomerPanel() {
 	}
 }
 
-void AccountPanel() {
+void AccountPanelForAdmin() {
 
 	AccountClass accountClasss;
 	CustomerClass customerClass;
@@ -2281,7 +2755,7 @@ void AccountPanel() {
 
 		system("cls");
 		cout << "\nAccount added. \n";
-		AccountPanel();
+		AccountPanelForAdmin();
 		break;
 
 	case 2:
@@ -2295,7 +2769,7 @@ void AccountPanel() {
 		}
 		system("cls");
 		cout << tempRes + " \n";
-		AccountPanel();
+		AccountPanelForAdmin();
 		break;
 
 	case 3:
@@ -2335,16 +2809,15 @@ void AccountPanel() {
 		tempRes = accountClasss.edit(tempId, tempType, tempBalance, tempBranchId);
 
 
-		while (cust_accClass.searchByaId(tempId).AccId != -1) {
-			cust_acc = cust_accClass.searchByaId(tempId);
-			cust_accClass.editcId(cust_acc, tempCustomerId);
-		}
+
+		cust_accClass.editcId(tempId, tempCustomerId);
+
 
 
 
 		system("cls");
 		cout << tempRes + " \n";
-		AccountPanel();
+		AccountPanelForAdmin();
 		break;
 
 	case 4:
@@ -2356,7 +2829,7 @@ void AccountPanel() {
 
 		if (tempPos == 1) {
 			system("cls");
-			AccountPanel();
+			AccountPanelForAdmin();
 		}
 		break;
 
@@ -2384,7 +2857,7 @@ void AccountPanel() {
 
 		if (tempPos == 1) {
 			system("cls");
-			AccountPanel();
+			AccountPanelForAdmin();
 		}
 		break;
 	case 6:
@@ -2397,7 +2870,7 @@ void AccountPanel() {
 	}
 }
 
-void LoanPanel() {
+void LoanPanelForAdmin() {
 
 	LoanClass loanClass;
 	CustomerClass customerClass;
@@ -2418,7 +2891,7 @@ void LoanPanel() {
 	int tempPos = 0;
 	int tempId, tempAmount, tempBranchId, tempCustomerId;
 	string tempType, tempDate, tempRes;
-	Loan tempLoan;
+	Loan tempLoan, lastLoan;
 	Cust_Loan cust_loan;
 	ostringstream oss;
 
@@ -2446,7 +2919,7 @@ void LoanPanel() {
 			cout << "\nBranch did not found. \n";
 			cout << "\nEnter loans branch ID:  ";
 			cin >> tempBranchId;
-		} 
+		}
 
 		while (loanClass.searchByBranchId(tempBranchId).LoanId != -1) {
 			cout << "\nThis customer already has a loan in this branch . \n";
@@ -2463,7 +2936,7 @@ void LoanPanel() {
 
 		system("cls");
 		cout << "\nLoan added. \n";
-		LoanPanel();
+		LoanPanelForAdmin();
 		break;
 
 	case 2:
@@ -2477,13 +2950,14 @@ void LoanPanel() {
 		}
 		system("cls");
 		cout << tempRes + " \n";
-		LoanPanel();
+		LoanPanelForAdmin();
 		break;
 
 	case 3:
 		cout << "\n";
 		cout << "Enter id of the loan you want to edit:  ";
 		cin >> tempId;
+		lastLoan = loanClass.searchById(tempId);
 
 		cout << "Enter new customers ID:  ";
 		cin >> tempCustomerId;
@@ -2509,7 +2983,7 @@ void LoanPanel() {
 		}
 
 
-		while (loanClass.searchByBranchId(tempBranchId).LoanId != -1) {
+		while (loanClass.searchByBranchId(tempBranchId).LoanId != -1 && lastLoan.BranchID != tempBranchId) {
 			cout << "\nThis customer already has a loan in this branch . \n";
 			cout << "\nEnter another branch ID:  ";
 			cin >> tempBranchId;
@@ -2518,16 +2992,14 @@ void LoanPanel() {
 		tempRes = loanClass.edit(tempId, tempType, tempAmount, tempBranchId);
 
 
-		while (cust_loanClass.searchBylId(tempId).LoanId != -1) {
-			cust_loan = cust_loanClass.searchBylId(tempId);
-			cust_loanClass.editcId(cust_loan, tempCustomerId);
-		}
+
+		cust_loanClass.editcId(tempId, tempCustomerId);
 
 
 
 		system("cls");
 		cout << tempRes + " \n";
-		LoanPanel();
+		LoanPanelForAdmin();
 		break;
 
 	case 4:
@@ -2539,7 +3011,7 @@ void LoanPanel() {
 
 		if (tempPos == 1) {
 			system("cls");
-			LoanPanel();
+			LoanPanelForAdmin();
 		}
 		break;
 
@@ -2567,7 +3039,7 @@ void LoanPanel() {
 
 		if (tempPos == 1) {
 			system("cls");
-			LoanPanel();
+			LoanPanelForAdmin();
 		}
 		break;
 	case 6:
@@ -2580,14 +3052,93 @@ void LoanPanel() {
 	}
 }
 
+void SpicalsPanel() {
+	AccountClass accountClass;
+	CustomerClass customerClass;
+	BankBranchClass branchClass;
+	LoanClass loanClass;
+	int selectedPos = 0, tempPos;
+	cout << endl;
+	cout << "                                                      Spicals Panel                                                    " << endl;
+	cout << " ===================================================================================================================== " << endl;
+	cout << endl;
+	cout << " 1 --> Costumers with balnce more than 25000\n";
+	cout << " 2 --> Costumers with no loan\n";
+	cout << " 3 --> Branches whom paid loan\n";
+	cout << " 4 --> A specific costumers loans\n";
+	cout << " 5 --> back \n\n";
+	cout << " What do you want to work with?  ";
+	cin >> selectedPos;
+	switch (selectedPos) {
+	case 1:
+		system("cls");
+		accountClass.getAllwithBalanceCheck();
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			SpicalsPanel();
+		}
+		break;
+
+	case 2:
+
+		system("cls");
+		customerClass.getAllWithNoLoan();
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			SpicalsPanel();
+		}
+		break;
+	case 3:
+
+		system("cls");
+		branchClass.getBranchesWhomPaidLoan();
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			SpicalsPanel();
+		}
+		break;
+	case 4:
+		cout << "Enter customers id:  ";
+		cin >> tempPos;
+
+		system("cls");
+		loanClass.getCustomersLoans(tempPos);
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			SpicalsPanel();
+		}
+		break;
+	case 5:
+		break;
+	default:
+		break;
+	}
+}
+
 void managerPanel() {
 	int selectedPos = 0;
 	cout << endl;
 	cout << "                                                     Manager Panel                                                     " << endl;
 	cout << " ===================================================================================================================== " << endl;
-	cout << "                            |  Bank  |  Branch  |  Customer  |  Account  |  Loan  |  back  |                           " << endl;
-	cout << "                            |   1    |    2     |      3     |     4     |   5    |    6   |                           " << endl;
-	cout << "                            ----------------------------------------------------------------                           " << endl;
+	cout << "                        |  Bank  |  Branch  |  Customer  |  Account  |  Loan  |  Special  |  back  |                   " << endl;
+	cout << "                        |   1    |    2     |      3     |     4     |   5    |     6     |    7   |                   " << endl;
+	cout << "                         ---------------------------------------------------------------------------                   " << endl;
 	cout << " What do you want to work with?  ";
 	cin >> selectedPos;
 	switch (selectedPos) {
@@ -2601,26 +3152,318 @@ void managerPanel() {
 		break;
 	case 3:
 		system("cls");
-		CustomerPanel();
+		CustomerPanelForAdmin();
 		break;
 	case 4:
 		system("cls");
-		AccountPanel();
+		AccountPanelForAdmin();
 		break;
 	case 5:
 		system("cls");
-		LoanPanel();
+		LoanPanelForAdmin();
 		break;
 	case 6:
+
+		system("cls");
+		SpicalsPanel();
+		break;
+	case 7:
 		break;
 	default:
 		break;
 	}
 }
 
-void userPanel() {
-	cout << "user panel";
+
+
+
+
+void CustomerPanelForUser() {
+
+	CustomerClass customerClass;
+	int selectedPos = 0;
+	cout << endl;
+	cout << "                                                     Customer Panel                                                    " << endl;
+	cout << " ===================================================================================================================== " << endl;
+	cout << "                                 |  Read All  |  search by name  |  search by id  |  back  |                           " << endl;
+	cout << "                                 |      1     |        2         |        3       |   4    |                           " << endl;
+	cout << "                                 -----------------------------------------------------------                           " << endl;
+
+	cout << " What do you want to work with?  ";
+	cin >> selectedPos;
+
+
+	int tempPos = 0;
+	int tempId;
+	string tempName, tempPhone, tempAddress, tempRes;
+	Customer tempCustomer;
+
+	switch (selectedPos) {
+
+	case 1:
+		system("cls");
+		customerClass.getAll();
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			CustomerPanelForUser();
+		}
+		break;
+
+	case 2:
+		cout << "Enter the customer Name for search:  ";
+		cin >> tempName;
+		tempCustomer = customerClass.searchByName(tempName);
+		if (tempCustomer.CustId == -1) {
+			cout << "\n";
+			cout << "customer not found";
+			cout << "\n";
+		}
+		else {
+			cout << "\n";
+			cout << "Id = " << tempCustomer.CustId << "\n";
+			cout << "Name = " << tempCustomer.Name << "\n";
+			cout << "Phone = " << tempCustomer.Phone << "\n";
+			cout << "Address = " << tempCustomer.Address << "\n";
+			cout << "\n";
+		}
+
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			CustomerPanelForUser();
+		}
+		break;
+	case 3:
+		cout << "Enter the customer Id for search:  ";
+		cin >> tempId;
+		tempCustomer = customerClass.searchById(tempId);
+		if (tempCustomer.CustId == -1) {
+			cout << "\n";
+			cout << "customer not found";
+			cout << "\n";
+		}
+		else {
+			cout << "\n";
+			cout << "Id = " << tempCustomer.CustId << "\n";
+			cout << "Name = " << tempCustomer.Name << "\n";
+			cout << "Phone = " << tempCustomer.Phone << "\n";
+			cout << "Address = " << tempCustomer.Address << "\n";
+			cout << "\n";
+		}
+
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			CustomerPanelForUser();
+		}
+		break;
+
+
+	case 4:
+		system("cls");
+		userPanel();
+		break;
+	default:
+
+		break;
+	}
 }
+
+void AccountPanelForUser() {
+
+	AccountClass accountClasss;
+	CustomerClass customerClass;
+	BankBranchClass branchClass;
+	Cust_AccClass cust_accClass;
+	int selectedPos = 0;
+	cout << endl;
+	cout << "                                                     Account Panel                                                     " << endl;
+	cout << " ===================================================================================================================== " << endl;
+	cout << "                                       |  Read All  |  search by id  |  back  |                                        " << endl;
+	cout << "                                       |      1     |        2       |   3    |                                        " << endl;
+	cout << "                                       ----------------------------------------                                        " << endl;
+
+	cout << " What do you want to work with?  ";
+	cin >> selectedPos;
+
+
+	int tempPos = 0;
+	int tempId, tempBalance, tempBranchId, tempCustomerId;
+	string tempType, tempDate, tempRes;
+	Account tempAccount;
+	Cust_ACC cust_acc;
+	ostringstream oss;
+
+
+	switch (selectedPos) {
+	case 1:
+		system("cls");
+		accountClasss.getAll();
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			AccountPanelForUser();
+		}
+		break;
+
+	case 2:
+		cout << "Enter the customer Id for search:  ";
+		cin >> tempId;
+		tempAccount = accountClasss.searchById(tempId);
+		if (tempAccount.AccId == -1) {
+			cout << "\n";
+			cout << "Account not found";
+			cout << "\n";
+		}
+		else {
+			cout << "\n";
+			cout << "Id = " << tempAccount.AccId << "\n";
+			cout << "Type = " << tempAccount.AccType << "\n";
+			cout << "Balance = " << tempAccount.Balance << "\n";
+			cout << "Branch id = " << tempAccount.BranchId << "\n";
+			cout << "\n";
+		}
+
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			AccountPanelForUser();
+		}
+		break;
+	case 3:
+		system("cls");
+		userPanel();
+		break;
+	default:
+
+		break;
+	}
+}
+
+void LoanPanelForUser() {
+
+	LoanClass loanClass;
+	CustomerClass customerClass;
+	BankBranchClass branchClass;
+	Cust_LoansClass cust_loanClass;
+	int selectedPos = 0;
+	cout << endl;
+	cout << "                                                       Loan Panel                                                      " << endl;
+	cout << " ===================================================================================================================== " << endl;
+	cout << "                                       |  Read All  |  search by id  |  back  |                                        " << endl;
+	cout << "                                       |      1     |       2        |   3    |                                        " << endl;
+	cout << "                                       ----------------------------------------                                        " << endl;
+
+	cout << " What do you want to work with?  ";
+	cin >> selectedPos;
+
+
+	int tempPos = 0;
+	int tempId, tempAmount, tempBranchId, tempCustomerId;
+	string tempType, tempDate, tempRes;
+	Loan tempLoan, lastLoan;
+	Cust_Loan cust_loan;
+	ostringstream oss;
+
+
+	switch (selectedPos) {
+	case 1:
+		system("cls");
+		loanClass.getAll();
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			LoanPanelForUser();
+		}
+		break;
+
+	case 2:
+		cout << "Enter the loans Id for search:  ";
+		cin >> tempId;
+		tempLoan = loanClass.searchById(tempId);
+		if (tempLoan.LoanId == -1) {
+			cout << "\n";
+			cout << "Loan not found";
+			cout << "\n";
+		}
+		else {
+			cout << "\n";
+			cout << "Id = " << tempLoan.LoanId << "\n";
+			cout << "Type = " << tempLoan.LoanType << "\n";
+			cout << "Amount = " << tempLoan.Amount << "\n";
+			cout << "Branch id = " << tempLoan.BranchID << "\n";
+			cout << "\n";
+		}
+
+
+		cout << "Enter 1 to go back:  ";
+		cin >> tempPos;
+
+		if (tempPos == 1) {
+			system("cls");
+			LoanPanelForUser();
+		}
+		break;
+	case 3:
+		system("cls");
+		userPanel();
+		break;
+	default:
+
+		break;
+	}
+}
+
+void userPanel() {
+	int selectedPos = 0;
+	cout << endl;
+	cout << "                                                       User Panel                                                      " << endl;
+	cout << " ===================================================================================================================== " << endl;
+	cout << "                                    |  Customer  |  Account  |  Loan  |  back  |                                       " << endl;
+	cout << "                                    |      1     |     2     |    3   |   4    |                                       " << endl;
+	cout << "                                    --------------------------------------------                                       " << endl;
+	cout << " What do you want to work with?  ";
+	cin >> selectedPos;
+	switch (selectedPos) {
+	case 1:
+		system("cls");
+		CustomerPanelForUser();
+		break;
+	case 2:
+		system("cls");
+		AccountPanelForUser();
+		break;
+	case 3:
+		system("cls");
+		LoanPanelForUser();
+		break;
+	case 4:
+		break;
+	default:
+		break;
+	}
+}
+
+
 
 void login() {
 
@@ -2654,4 +3497,3 @@ void main() {
 
 	login();
 }
-
